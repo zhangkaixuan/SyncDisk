@@ -52,7 +52,7 @@
     <ApplicationIcon>notify.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>myclouddisk.Program</StartupObject>
+    <StartupObject>myclouddisk.HTTPClient</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>9F20C52759AC0BDB6CCC1D72738EB784D5924033</ManifestCertificateThumbprint>
@@ -74,6 +74,10 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -92,6 +96,7 @@
     <Compile Include="Log.cs" />
     <Compile Include="Monitor.cs" />
     <Compile Include="MyFileSystemWather.cs" />
+    <Compile Include="Object.cs" />
     <Compile Include="OpinionWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -116,6 +121,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -36,13 +36,15 @@ namespace myclouddisk
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+           
+
             status = RsyncStatus.STARTING;
             ui = new UI(monitorPath);
             if(!Directory.Exists(monitorPath))
             {
                 Directory.CreateDirectory(monitorPath);
             }
-
+            RsyncService.InitLocalDirectory();
             Thread t1 = new Thread(new ThreadStart(runMonitor));
             Thread t2 = new Thread(new ThreadStart(handleEvent));
             

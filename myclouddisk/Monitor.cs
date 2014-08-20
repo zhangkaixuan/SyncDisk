@@ -7,7 +7,7 @@ namespace myclouddisk
 {
     class Monitor
     {
-        public Log log;
+        //public Log log;
         internal static void startUp(String path)
         {
             MyFileSystemWather myWather;
@@ -69,23 +69,13 @@ namespace myclouddisk
             eve.NewFullPath = e.FullPath;
             eve.NewName = e.Name;
             eve.OpertionType = OperationType.CREATE;
-
-            string type = "object";
-            if (GetFileType(e.FullPath) == 1)
-            {
-                type = "file";
-                eve.FileType = FileType.FILE;
-            }
-            if (GetFileType(e.FullPath) == 0)
-            {
-                type = "directory";
-                eve.FileType = FileType.DIRECTORY;
-            }
-            
+            eve.FileType = GetFileType(e.FullPath);
+            FileType type = eve.FileType;
+           
             Log log = new Log("log.txt");
-            log.WriteLine("[new a " + type + "] " + e.FullPath);
+            log.WriteLine(eve.GenerateTime.ToUniversalTime() +" [new a " + type + "] " + e.FullPath);
             Program.eventBuffer.Enqueue(eve);
-            Console.WriteLine("[new a " + type + "] " + e.FullPath);
+            Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [new a " + type + "] " + e.FullPath);
         }
 
         private static void OnChanged(object source, FileSystemEventArgs e)
@@ -104,10 +94,10 @@ namespace myclouddisk
                 eve.NewName = e.Name;
                 eve.OpertionType = OperationType.MODIFY;
                 Log log = new Log("log.txt");
-                log.WriteLine("[modify a file] " + e.FullPath);
+                log.WriteLine(eve.GenerateTime.ToUniversalTime()+" [modify a FILE] " + e.FullPath);
                 Program.eventBuffer.Enqueue(eve);
 
-                Console.WriteLine("[modify a file]"+e.FullPath);
+                Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [modify a FILE]"+e.FullPath);
 
             }
         }
@@ -123,10 +113,10 @@ namespace myclouddisk
             eve.NewName = e.Name;
             eve.OpertionType = OperationType.DELETE;
             Log log = new Log("log.txt");
-            log.WriteLine("[delete an object] " + e.FullPath);
+            log.WriteLine(eve.GenerateTime.ToUniversalTime()+" [delete an OBJECT] " + e.FullPath);
             Program.eventBuffer.Enqueue(eve);
 
-            Console.WriteLine("[delete an object] " + e.FullPath);
+            Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [delete an OBJECT] " + e.FullPath);
         
         }
         private static void OnRenamed(object source, RenamedEventArgs e)
@@ -135,32 +125,21 @@ namespace myclouddisk
             FileEvent eve = new FileEvent();
            
             if (DocumentIsChanged(e.OldName))
-            {
-                string type;
-                if (GetFileType(e.FullPath) == 1)
-                {
-                    eve.FileType = FileType.FILE;
-                    type = "file";
-                }
-                else if (GetFileType(e.FullPath) == 0)
-                {
-                    eve.FileType = FileType.DIRECTORY;
-                    type = "directory";
-                }
-                else type = "object";
-
+            {                
                 eve.NewFullPath = e.FullPath;
                 eve.OldFullPath = e.OldFullPath;
                 eve.NewName = e.Name;
                 eve.OldName = e.OldName;
                 eve.GenerateTime = DateTime.Now;
                 eve.OpertionType = OperationType.RENAME;
-                eve.FileType = FileType.FILE;
+                eve.FileType = GetFileType(e.FullPath);
+                FileType type = eve.FileType;
+
                 Log log = new Log("log.txt");
-                log.WriteLine("[rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
+                log.WriteLine(eve.GenerateTime.ToUniversalTime() +" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
                 Program.eventBuffer.Enqueue(eve);
 
-                Console.WriteLine("[rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
+                Console.WriteLine(eve.GenerateTime.ToUniversalTime() +" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
                 return;
             }
             if (DocumentIsChanged(e.Name))
@@ -175,43 +154,31 @@ namespace myclouddisk
                 eve.OldName = e.OldName;
                 eve.GenerateTime = DateTime.Now;
                 eve.OpertionType = OperationType.RENAME;
-                eve.FileType = FileType.OBJECT;
-                
-                string type;
-                if (GetFileType(e.FullPath) == 1)
-                {
-                    eve.FileType = FileType.FILE;
-                    type = "file";
-                }
-                else if (GetFileType(e.FullPath) == 0)
-                {
-                    eve.FileType = FileType.DIRECTORY;
-                    type = "directory";
-                }
-                else type = "object";
+                eve.FileType = GetFileType(e.FullPath);
+                FileType type = eve.FileType;
                 Log log = new Log("log.txt");
-                log.WriteLine("[rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
+                log.WriteLine(eve.GenerateTime.ToUniversalTime()+" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
                 Program.eventBuffer.Enqueue(eve);
-                Console.WriteLine("[rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
+                Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
 
             }
 
 
         }
-        private static int GetFileType(string fullpath)
+        private static FileType GetFileType(string fullpath)
         {
             //Console.WriteLine(fullpath);
             if (File.Exists(fullpath))
             {
-                return 1;
+                return FileType.FILE;
             }
             else if (Directory.Exists(fullpath))
             {
-                return 0;
+                return FileType.DIRECTORY;
             }
             else
             {
-                return -1;
+                return FileType.NONE;
             }
         }
         private static bool HasSpecidirListString(string path)

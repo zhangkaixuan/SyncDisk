@@ -19,7 +19,8 @@ namespace myclouddisk
     {
         FILE,
         DIRECTORY,
-        OBJECT
+        OBJECT,
+        NONE
     }
     /// <summary>
     /// 文件操作事件类
