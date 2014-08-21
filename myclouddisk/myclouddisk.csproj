@@ -52,7 +52,7 @@
     <ApplicationIcon>notify.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>myclouddisk.HTTPClient</StartupObject>
+    <StartupObject>myclouddisk.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>9F20C52759AC0BDB6CCC1D72738EB784D5924033</ManifestCertificateThumbprint>

@@ -3,75 +3,27 @@ using System.Net;
 using System.Windows.Forms;
 using System;
 using System.Collections;
+using System.Text;
 namespace myclouddisk
 {
     class HTTPClient
     {
-        public static string host;
+        public static string host = "http://192.168.1.113:8080/";
         public static void Main()
         {
             //HTTPClient.createUser("045130160", "123456");
             //HTTPClient.PUT("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\popmusic\jackson");
-            //HTTPClient.GET("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\popmusic");
+            //HTTPClient.GET("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music",1);
             //HTTPClient.getRootContainer("045130160","123456");
             //HTTPClient.DELETE("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music");
+            //HTTPClient.DELETE("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music\test.txt");
             //HTTPClient.POST("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music","popmusic");
-            //HTTPClient.PUT("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\test.txt");
-            HTTPClient.getRootContainer("045130160", "123456");
+            //HTTPClient.PUT("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\document\china history.docx");
+            //HTTPClient.getRootContainer("045130160", "123456","scloud-container");
+            //HTTPClient.GETFile("045130160","123456","http://192.168.1.113:8080/scloud_object/document/document.txt");
+           // HTTPClient.GET("045130160","123456","scloud_container","scloud-container",@"C:\我的云盘\music");
 
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="httpURI"></param>
-        /// <param name="localFilePath"></param>
-        /// <returns></returns>
-        public static string UploadFile(string httpURI, string localFilePath)
-        {
-            try
-            {
-                System.IO.FileInfo myfile = new System.IO.FileInfo(localFilePath);
-                byte[] fileContentBytes = new byte[int.Parse(myfile.Length.ToString())];
-                FileStream fsv = File.OpenRead(localFilePath);
-                int nv = fsv.Read(fileContentBytes, 0, int.Parse(myfile.Length.ToString()));
-                Uri destUri = new Uri(httpURI);
-                MemoryStream inStream = new MemoryStream(fileContentBytes);
-                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(destUri);
-
-                req.Method = "PUT";
-                req.ContentType = "scloud-object";
-                req.Headers.Add("Authorization", "045130160:123456");
-                req.Headers.Add("X-CDMI-Specification-Version", "v1");
-                req.Host = "192.168.1.113";
-                req.Date = System.DateTime.Now;
-
-                req.Timeout = 50000;
-
-                Stream outStream = req.GetRequestStream();
-                byte[] buffer = new byte[1024];
-                while (true)
-                {
-                    int numBytesRead = inStream.Read(buffer, 0, buffer.Length);
-                    if (numBytesRead <= 0)
-                        break;
-                    outStream.Write(buffer, 0, numBytesRead);
-                }
-                inStream.Close();
-                outStream.Close();
-                HttpWebResponse res = (HttpWebResponse)req.GetResponse();
-                Console.WriteLine(res.Headers);
-                return "OK";
-
-
-            }
-
-            catch (System.Exception ee)
-            {
-                return ee.Message;
-            }
-        }
-
         public HTTPClient()
         {
 
@@ -86,11 +38,9 @@ namespace myclouddisk
         /// <param name="localPath">本地文件路径，例如"C:\我的云盘\XXX\YYYY"</param>
         public static void PUT(string user, string password, string fileType,string contentType, string localPath)
         {
-            string httpuri = "http://192.168.1.113:8080/" + fileType;
-
-
-            
-            Uri uri = new Uri(localPath.Replace(@"C:\我的云盘", httpuri));
+            //string httpuri = "http://192.168.1.113:8080/" + fileType;     
+            //Uri uri = new Uri(localPath.Replace(@"C:\我的云盘", httpuri));
+            Uri uri = generateHttpURI(fileType, localPath);
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
 
             request.ContentType = contentType;
@@ -102,80 +52,41 @@ namespace myclouddisk
             request.Timeout = 50000;
             if (fileType == "scloud_object")
             {
-
                 //HttpWebRequest req = request;
                 Stream reqStream = null;
-                FileStream rdr = null;
+                FileStream fs = null;
                 try
                 {
                     request.AllowWriteStreamBuffering = true;
                     // Retrieve request stream 
                     reqStream = request.GetRequestStream();
                     // Open the local file
-                    rdr = new FileStream(localPath, FileMode.Open);
+                    fs = new FileStream(localPath, FileMode.Open, FileAccess.ReadWrite);
+         
+                    BinaryReader br = new BinaryReader(fs);
 
-                    byte[] inData = new byte[1024];
+                    byte[] inData = br.ReadBytes((int)fs.Length);
 
-                   
-                    int bytesRead = rdr.Read(inData, 0, inData.Length);
-                    Console.WriteLine("size:" + bytesRead);
-                    
-                    while (bytesRead > 0)
-                    {
-                        reqStream.Write(inData, 0, bytesRead);
-                        bytesRead = rdr.Read(inData, 0, inData.Length);
-                    }
+                    reqStream.Write(inData,0,inData.Length);
+                    reqStream.Close();
+                    fs.Close();            
 
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                    rdr.Close();
-                    reqStream.Close();
                     Console.WriteLine(response.Headers);
                     return;
                 }
-
-                catch (Exception e)
+                catch (System.Net.WebException ee)
                 {
-                    Console.WriteLine(e);
+                    Console.WriteLine(ee);
                 }
-                finally
-                {
-                    if (reqStream != null)
-                    {
 
-                        reqStream.Close();
-
-                    }
-
-                    if (rdr != null)
-                    {
-
-                        rdr.Close();
-                    }
-
-                }
                
                 return;
             }
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
                 Console.WriteLine(response.Headers);
-                Console.WriteLine(response.StatusCode);
-                Console.WriteLine(response.StatusDescription);
-                Console.WriteLine(response.GetResponseStream());
-
-                StreamReader streamReader = new StreamReader(response.GetResponseStream(), System.Text.Encoding.GetEncoding("UTF-8"));
-                string content = streamReader.ReadToEnd();
-                Console.WriteLine(content);
-                //StreamWriter sw = new StreamWriter("C:/我的云盘/test.txt");
-                //sw.Write(content);
-                //sw.Flush();
-                //sw.Close();
-                streamReader.Close();
-
-
-                Console.WriteLine(content);
             }
             catch (System.Net.WebException ee)
             {
@@ -184,10 +95,46 @@ namespace myclouddisk
             }
             return;
         }
-        public static string[] GET(string user, string password, string fileType, string contentType, string localPath)
+        public static void GETFile(string user, string password,string HttpURI)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(HttpURI);
+
+            request.ContentType = "scloud-object";
+            request.Method = "GET";
+            request.Headers.Add("Authorization", user + ":" + password);
+            request.Headers.Add("X-CDMI-Specification-Version", "v1");
+            request.Host = "192.168.1.113";
+            request.Date = System.DateTime.Now;
+
+            request.Timeout = 50000;
+
+            try
+            {
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                StreamReader streamReader = new StreamReader(response.GetResponseStream(), System.Text.Encoding.GetEncoding("UTF-8"));
+                string content = streamReader.ReadToEnd();
+                Console.WriteLine(response.Headers);
+                string localPath = HttpURI.Replace("http://192.168.1.113:8080/scloud_object",@"C:\我的云盘");
+                localPath = localPath.Replace("/",@"\");
+                Console.WriteLine("写入本地文件：" + localPath);
+                StreamWriter sw = new StreamWriter(localPath);
+                sw.Write(content);
+                sw.Flush();
+                sw.Close();
+                streamReader.Close();
+            }
+
+            catch (System.Net.WebException ee)
+            {
+                Console.WriteLine(ee);
+            }
+
+
+        }
+        public static string[] GET(string user, string password, string fileType, string contentType, string localPath,int flag)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create( generateHttpURI(fileType, localPath));
-
+            Console.WriteLine("请求的URI：" + generateHttpURI(fileType, localPath));
             request.ContentType = contentType;
             request.Method = "GET";
             request.Headers.Add("Authorization", user + ":" + password);
@@ -197,26 +144,35 @@ namespace myclouddisk
 
             request.Timeout = 50000;
 
-            if(fileType == "scloud_object")
-            {
-                return null;
-            }
-
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-
-                string con = response.Headers.Get("Containers");
-                if(con == null || con == "")
+                string c = response.Headers.Get("Containers");
+                string o = response.Headers.Get("Objects");
+                if(c == null && o==null)
                 {
                     return null;
                 }
 
-                string[] containers = con.Replace("[", "").Replace("]", "").Replace("'", "").Split(',');
+                string con = "";
+
+                if (c != null)
+                {
+                    con = c.Replace("[", "").Replace("]", "").Replace("'", "").Trim();
+                }
+                  
+                if (flag == 0 && o != null)//need object
+                {
+                    con = o.Replace("[", "").Replace("]", "").Replace("'", "").Trim();
+
+                }
+                if (con == "")
+                    return null;
+                    
+                string[] containers = con.Split(',');
+
                 Console.WriteLine(response.Headers);
-                Console.WriteLine(response.StatusCode);
-                Console.WriteLine(response.GetResponseStream());
 
                 return containers;
             }
@@ -255,26 +211,11 @@ namespace myclouddisk
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-
                 Console.WriteLine(response.Headers);
-                Console.WriteLine(response.StatusCode);
-                Console.WriteLine(response.GetResponseStream());
-
-                StreamReader streamReader = new StreamReader(response.GetResponseStream(), System.Text.Encoding.GetEncoding("UTF-8"));
-                string content = streamReader.ReadToEnd();
-                Console.WriteLine(content);
-                //StreamWriter sw = new StreamWriter("C:/我的云盘/test.txt");
-                //sw.Write(content);
-                //sw.Flush();
-                //sw.Close();
-                streamReader.Close();
-
-                Console.WriteLine(content);
             }
             catch (System.Net.WebException ee)
             {
-                Console.WriteLine("无法连接到服务器：" + ee);
+                Console.WriteLine(ee);
                 return;
             }
         }
@@ -352,7 +293,7 @@ namespace myclouddisk
         /// <param name="user"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public static string[] getRootContainer(string user, string password)
+        public static string[] getRootContainer(string user, string password,string contentType)
         {
             Uri uri = new Uri("http://192.168.1.113:8080/scloud_domain/");
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
@@ -373,12 +314,25 @@ namespace myclouddisk
                 Console.WriteLine(response.Headers);
                 Console.WriteLine(response.StatusCode);
 
-                string con = response.Headers.Get("Containers");
+                string c = response.Headers.Get("Containers");
+                string o = response.Headers.Get("Objects");
+                if(c==null && o== null)
+                {
+                    return null;
+                }
+                string con = c.Replace("[", "").Replace("]", "").Replace("'", "").Trim();
+                
+                if(contentType == "scloud-object")
+                {
+                    if (response.Headers.Get("Objects") == null)
+                        return null;
+                    con = response.Headers.Get("Objects").Replace("[", "").Replace("]", "").Replace("'", "").Trim();
+                }
                 if (con == null || con == "")
                 {
                     return null;
                 }
-                string[] containers = con.Replace("[", "").Replace("]", "").Replace("'", "").Split(',');
+                string[] containers = con.Split(',');
                 
                 return containers;
             }
@@ -416,7 +370,7 @@ namespace myclouddisk
         /// <returns></returns>
         private static Uri generateHttpURI(string fileType, string localPath)
         {
-            string httpuri = "http://192.168.1.113:8080/" + fileType + "/";
+            string httpuri = "http://192.168.1.113:8080/" + fileType+"/" ;
             Uri uri = new Uri(localPath.Replace(@"C:\我的云盘\", httpuri));
             Console.WriteLine("转化URI："+localPath+" -> "+uri.ToString());
             return uri;

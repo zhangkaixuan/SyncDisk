@@ -50,7 +50,7 @@ namespace myclouddisk
                 {                    
                      if (Directory.GetDirectories(e1.NewFullPath).Length > 0 || Directory.GetFiles(e1.NewFullPath).Length > 0)//文件夹非空
                      {
-                          Console.WriteLine("***********创造了非空的文件目录，该非空目录中的文件可能不会同步！****************" + e1.NewFullPath);
+                          //Console.WriteLine("***********创造了非空的文件目录，该非空目录中的文件可能不会同步！****************" + e1.NewFullPath);
                           handleEventOneByOne(e1);
                           //
                           //以下是处理遗漏的操作
@@ -101,22 +101,6 @@ namespace myclouddisk
                     {
                         handleEventOneByOne(e1);
                         handle(e2);//递归调用
-                        //Console.WriteLine("可能发生了同一驱动器内的剪切、拖拽动作,目录为：" + e1.NewFullPath);
-                        //if (Directory.GetDirectories(e1.NewFullPath).Length == 0 && Directory.GetFiles(e1.NewFullPath).Length == 0)//文件夹非空
-                        //{
-                        //    Console.WriteLine("虽然发生了拖拽事件，但是目录是空的，我们可以忽略之" + e1.NewFullPath);
-                        //    return;
-                        //}
-                        //handleEventOneByOne(e1);
-                        //{
-                        //    //
-                        //    //@TODO
-                        //    //处理遗漏的操作，即将该非空目录下
-                        //    //针对同一驱动器有效，对不同驱动器可能会有冗余产生。
-                        //    //
-                        //}
-                        //handleEventOneByOne(e1);
-                        //handleEventOneByOne(e2);
                     }
 
                 }
