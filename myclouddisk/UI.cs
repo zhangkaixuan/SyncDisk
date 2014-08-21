@@ -35,7 +35,7 @@ namespace myclouddisk
             // notifyIcon
             // 
             notifyIcon.ContextMenuStrip = this.menu;
-            notifyIcon.Text = "ECUST同步系统";
+            notifyIcon.Text = "文件正在同步中";
            
             notifyIcon.Icon = iNotify;
             this.notifyIcon.MouseDown += new System.Windows.Forms.MouseEventHandler(notify_Click);//为系统托盘添加鼠标事件监听
@@ -98,7 +98,7 @@ namespace myclouddisk
                 }
                 else
                     timeDiff = "刚刚更新";
-                this.notifyIcon.Text = "文件是最新的 - 上次更新时间是：" + timeDiff;
+                this.notifyIcon.Text = "文件是最新的 - 上次更新时间：" + timeDiff;
 
             }
             else if (Program.status == RsyncStatus.STARTING)

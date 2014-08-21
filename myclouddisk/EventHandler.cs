@@ -196,8 +196,11 @@ namespace myclouddisk
         {
             string contentType = "scloud-container";
             string fileType = "scloud_container";
-            string oldFullPath = e.NewFullPath;
-            string newName = e.NewName;
+
+            string oldFullPath = e.OldFullPath;
+            string[] path = e.NewName.Split('\\');
+            string newName = path[path.Length - 1];
+            Console.WriteLine("newName:"+newName);
             if (e.FileType == FileType.FILE)
             {
                 contentType = "scloud-object";
@@ -218,6 +221,7 @@ namespace myclouddisk
             string contentType = "scloud-container";
             string fileType = "scloud_container";
             string localPath = e.NewFullPath;
+          
             HTTPClient.DELETE("045130160","123456",fileType,contentType,localPath);
 
             Console.WriteLine("已同步：删除对象" + "[" + e.NewFullPath + "]");

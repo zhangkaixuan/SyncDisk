@@ -96,6 +96,7 @@ namespace myclouddisk
                 for (int j = 0; j < containers2.Length; ++j)
                 {
                     containers2[j] = containers[i].Trim() + "/" + containers2[j].Trim();
+                    //Console.WriteLine("containers2::"+containers2[j]);
                 }
 
                 getContainers(containers2);
@@ -110,8 +111,8 @@ namespace myclouddisk
             }
             for(int i=0;i<objects.Length;++i)
             {
-                Console.WriteLine("文件：" + objects[i]);
-                Console.WriteLine("请求object：" + "http://192.168.1.113:8080/scloud_object/" + objects[i].Trim());
+                //Console.WriteLine("文件：" + objects[i]);
+                //Console.WriteLine("请求object：" + "http://192.168.1.113:8080/scloud_object/" + objects[i].Trim());
                 HTTPClient.GETFile("045130160", "123456", "http://192.168.1.113:8080/scloud_object/" + objects[i].Trim());
             }
             return;

@@ -61,6 +61,10 @@ namespace myclouddisk
                     // Retrieve request stream 
                     reqStream = request.GetRequestStream();
                     // Open the local file
+                    //
+                    //@TODO
+                    //读一个文件之前应该判断是否被其他进程占用
+                    //
                     fs = new FileStream(localPath, FileMode.Open, FileAccess.ReadWrite);
          
                     BinaryReader br = new BinaryReader(fs);
@@ -79,7 +83,6 @@ namespace myclouddisk
                 {
                     Console.WriteLine(ee);
                 }
-
                
                 return;
             }
@@ -372,7 +375,7 @@ namespace myclouddisk
         {
             string httpuri = "http://192.168.1.113:8080/" + fileType+"/" ;
             Uri uri = new Uri(localPath.Replace(@"C:\我的云盘\", httpuri));
-            Console.WriteLine("转化URI："+localPath+" -> "+uri.ToString());
+            //Console.WriteLine("转化URI："+localPath+" -> "+uri.ToString());
             return uri;
         }
 
