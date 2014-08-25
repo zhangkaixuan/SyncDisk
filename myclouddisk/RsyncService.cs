@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
 using System.IO;
+using System.Xml;
+using System.Windows.Forms;
 namespace myclouddisk
 {
     class RsyncService
@@ -18,13 +20,17 @@ namespace myclouddisk
 
             Console.WriteLine("初始化本地目录.....");
             Program.ui.setIcon("sync");
-            string[] containers = HTTPClient.getRootContainer("045130160", "123456","scloud-container");
-            string[] objects = HTTPClient.getRootContainer("045130160", "123456", "scloud-object");
+            string[] containers = HTTPClient.getRootContainer(Program.USER,Program.PASSWD,"scloud-container");
+            string[] objects = HTTPClient.getRootContainer(Program.USER,Program.PASSWD, "scloud-object");
             getContainers(containers);
             getObjects(containers);
             Program.ui.setIcon("default");
            
         }
+        /// <summary>
+        /// 获取目录列表，并初始化本地目录，该方法仅仅用于初次初始化本地目录
+        /// </summary>
+        /// <param name="containers">含目录名称的数组</param>
         private static void getContainers(string[] containers)
         {
 
@@ -35,14 +41,14 @@ namespace myclouddisk
 
             for (int i = 0; i < containers.Count(); ++i)
             {
-                string dirPath = @"C:\我的云盘\" + containers[i].Trim();
+                string dirPath = Program.MONITOR_PATH + containers[i].Trim();
                 if (!Directory.Exists(dirPath))
                 {
                     Directory.CreateDirectory(dirPath);
 
                 }
-                //Console.WriteLine("URI:"+dirPath);
-                string[] containers2 = HTTPClient.GET("045130160", "123456", "scloud_container", "scloud-container", dirPath,1);
+                Console.WriteLine("URI:"+dirPath);
+                string[] containers2 = HTTPClient.GET(Program.USER, Program.PASSWD, "scloud_container", "scloud-container", dirPath,1);//1表示返回的是container数组
 
                 if (containers2 == null)
                 {
@@ -58,6 +64,10 @@ namespace myclouddisk
             }
 
         }
+        /// <summary>
+        /// 初始化本地文件，本方法仅仅用于程序初始化本地文件用
+        /// </summary>
+        /// <param name="containers">含目录名称的数组</param>
 
         private static void getObjects(string[] containers)
         {
@@ -69,16 +79,16 @@ namespace myclouddisk
 
             for(int i=0;i<containers.Length;++i)
             {
-                string dirPath = @"C:\我的云盘\" + containers[i].Trim();
+                string dirPath = Program.MONITOR_PATH + containers[i].Trim();
 
-                string[] objects = HTTPClient.GET("045130160","123456","scloud_container","scloud-container",dirPath,0);
+                string[] objects = HTTPClient.GET(Program.USER,Program.PASSWD,"scloud_container","scloud-container",dirPath,0);//0表示返回的是null，已经将文件写入本地
 
                 if(objects != null)
                 {
                     for(int j=0;j<objects.Length;++j)
                     {
 
-                        //Console.WriteLine("object*********" + objects[j]); 
+                        Console.WriteLine("object*********" + objects[j]); 
                         objects[j] = containers[i].Trim() + "/" + objects[j].Trim();
                     }
 
@@ -86,7 +96,7 @@ namespace myclouddisk
 
                 initLocalObjects(objects);
 
-                string[] containers2 = HTTPClient.GET("045130160", "123456", "scloud_container", "scloud-container", dirPath,1);
+                string[] containers2 = HTTPClient.GET(Program.USER, Program.PASSWD, "scloud_container", "scloud-container", dirPath,1);//1表示返回的是container数组
 
                 if (containers2 == null)
                 {
@@ -103,6 +113,10 @@ namespace myclouddisk
             }
 
         }
+        /// <summary>
+        /// 从服务器获取object即文件，并写入本地相对应的目录
+        /// </summary>
+        /// <param name="objects">object数组</param>
         private static void initLocalObjects(string[] objects)
         {
             if(objects == null || objects.Length==0)
@@ -111,12 +125,35 @@ namespace myclouddisk
             }
             for(int i=0;i<objects.Length;++i)
             {
-                //Console.WriteLine("文件：" + objects[i]);
-                //Console.WriteLine("请求object：" + "http://192.168.1.113:8080/scloud_object/" + objects[i].Trim());
-                HTTPClient.GETFile("045130160", "123456", "http://192.168.1.113:8080/scloud_object/" + objects[i].Trim());
+                Console.WriteLine("文件：" + objects[i]);
+                Console.WriteLine("请求object：" + Program.SERVER_URL+"scloud_object/" + objects[i].Trim());
+                HTTPClient.GETFile(Program.USER, Program.PASSWD, Program.SERVER_URL+ "scloud_object/" + objects[i].Trim());
             }
             return;
 
         }
+        /// <summary>
+        /// 从配置文件中读取一些参数
+        /// </summary>
+        public static void initParameter()
+        {
+            //XmlDocument doc = new XmlDocument();
+            //try
+            //{
+            //    doc.Load("config.xml");
+            //    Program.MONITOR_PATH = doc.SelectSingleNode("default/global/monitorpath").ToString();
+            //    Program.SERVER_URL = doc.SelectSingleNode("default/global/serverurl").ToString();
+            //}
+            //catch (System.Xml.XmlException ee)
+            //{
+            //    MessageBox.Show(ee.ToString(), "初始化参数异常", MessageBoxButtons.OK);
+            //    Console.WriteLine(ee);
+            //    Application.Exit();
+
+            //}
+            Program.IN_IP = HTTPClient.getLocalIP();
+        }
+           
+
     }
 }

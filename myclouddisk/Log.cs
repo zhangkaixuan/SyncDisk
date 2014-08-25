@@ -81,7 +81,7 @@ namespace myclouddisk
                     {
                         //
                         //有异常！
-                        //Console.WriteLine(ex.Message);
+                        Console.WriteLine(ex.Message);
                         while (!lockDic.ContainsKey(len))
                         {
                             len += lockDic[len];

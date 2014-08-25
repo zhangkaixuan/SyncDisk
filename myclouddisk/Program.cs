@@ -8,6 +8,9 @@ using System.Threading;
 using System.IO;
 namespace myclouddisk
 {
+    /// <summary>
+    ///同步状态
+    /// </summary>
     public enum RsyncStatus
     {
         STARTING,
@@ -15,49 +18,71 @@ namespace myclouddisk
         FINISHED,
         ERROR
     }
+    /// <summary>
+    /// 主类
+    /// </summary>
     static class Program
     {
-        /// <summary>
-        /// 应用程序的主入口点。
-        /// </summary>
-        ///  
         public static Queue<FileEvent> eventBuffer = new Queue<FileEvent>();
         public static EventHandler eventHandler = new EventHandler();
-        public static RsyncStatus status ;
+        public static RsyncStatus status = RsyncStatus.STARTING;
         public static DateTime lastUpdateTime = DateTime.Now;
         public static UI ui ;
         public static bool flag = false;
-        public static string monitorPath = @"C:\我的云盘";
-        public static string currentUser="045130160";
-        public static string hostURL="192.168.1.113:8080";
-        public static string selfIP = "10.0.0.2";
+
+        public static string MONITOR_PATH = @"C:\我的云盘\";
+        public static string USER = "045130160";
+        public static string PASSWD = "123456";
+        public static string SERVER_URL = "http://192.168.1.113:8080/";
+        public static string IN_IP;
+        public static string PUB_IP = "";
+        /// <summary>
+        /// 程序入口，即主函数
+        /// </summary>
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-           
-
-            status = RsyncStatus.STARTING;
-            ui = new UI(monitorPath);
-            if(!Directory.Exists(monitorPath))
-            {
-                Directory.CreateDirectory(monitorPath);
-            }
-            RsyncService.InitLocalDirectory();
-            Thread t1 = new Thread(new ThreadStart(runMonitor));
-            Thread t2 = new Thread(new ThreadStart(handleEvent));
-            
-            t1.Start();
-            t2.Start();
+            init();
 
             Application.Run();
         }
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        private static  void init()
+        {
+            RsyncService.initParameter();//初始化参数
+
+            ui = new UI(MONITOR_PATH);//载入UI
+            
+            if (!Directory.Exists(MONITOR_PATH))//监察被监视目录是否存在
+            {
+                Directory.CreateDirectory(MONITOR_PATH);
+            }
+
+            RsyncService.InitLocalDirectory();//初始化本地目录
+
+            Thread t1 = new Thread(new ThreadStart(runMonitor));//开启监控
+            Thread t2 = new Thread(new ThreadStart(runEventHandler));//开启事件处理器
+
+            t1.Start();
+            t2.Start();
+
+
+        }
+        /// <summary>
+        /// 启动本地监控服务
+        /// </summary>
         private static void runMonitor()
         {
-            Monitor.startUp(monitorPath);
+            Monitor.startUp(MONITOR_PATH);
         }
-        private static void handleEvent()
+        /// <summary>
+        /// 启动事件处理服务
+        /// </summary>
+        private static void runEventHandler()
         {
             while (true)
             {

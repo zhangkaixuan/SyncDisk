@@ -222,7 +222,11 @@ namespace myclouddisk
             string fileType = "scloud_container";
             string localPath = e.NewFullPath;
           
-            HTTPClient.DELETE("045130160","123456",fileType,contentType,localPath);
+           if( HTTPClient.DELETE("045130160","123456",fileType,contentType,localPath))
+           {
+               return;
+           }
+            HTTPClient.DELETE("045130160", "123456", "scloud_object", "scloud-object", localPath);
 
             Console.WriteLine("已同步：删除对象" + "[" + e.NewFullPath + "]");
         }

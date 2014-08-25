@@ -52,7 +52,7 @@
     <ApplicationIcon>notify.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>myclouddisk.Program</StartupObject>
+    <StartupObject>myclouddisk.HTTPClient</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>9F20C52759AC0BDB6CCC1D72738EB784D5924033</ManifestCertificateThumbprint>
@@ -154,6 +154,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="config.xml" />
     <Content Include="notify.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
