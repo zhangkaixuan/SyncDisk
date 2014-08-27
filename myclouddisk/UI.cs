@@ -14,8 +14,6 @@ namespace myclouddisk
         private String path;
         private Icon iNotify = new Icon(@"images/notify.ico");
         private Icon iNotifySync = new Icon(@"images/sync.ico");
-        //private Icon iNotifyDown = new Icon(@"images/notify-down.ico");
-        //private bool blink = false;
 
         public UI(String path)
         {
@@ -35,7 +33,7 @@ namespace myclouddisk
             // notifyIcon
             // 
             notifyIcon.ContextMenuStrip = this.menu;
-            notifyIcon.Text = "文件正在同步中";
+            notifyIcon.Text = "程序正在初始化中，请稍后使用";
            
             notifyIcon.Icon = iNotify;
             this.notifyIcon.MouseDown += new System.Windows.Forms.MouseEventHandler(notify_Click);//为系统托盘添加鼠标事件监听
@@ -55,7 +53,6 @@ namespace myclouddisk
             // item1
             // 
             this.item1.Name = "item1";
-            //this.item1.Size = new System.Drawing.Size(152, 22);
             this.item1.Text = "在文件资源管理器中打开";
             this.item1.MouseDown += new System.Windows.Forms.MouseEventHandler(item1_Click);
             //

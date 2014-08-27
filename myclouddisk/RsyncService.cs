@@ -12,23 +12,26 @@ namespace myclouddisk
         /// 
         public static void InitLocalDirectory()
         {
-
-            Console.WriteLine("初始化本地目录.....");
+            Console.WriteLine("........................................................");
+            Console.WriteLine("初始化本地目录..........................................");
+            Console.WriteLine("........................................................");
             Program.ui.setIcon("sync");
 
-            string[] containers = HTTPClient.getRootContainer(Program.USER,Program.PASSWD,"scloud-container");
-            string[] objects = HTTPClient.getRootContainer(Program.USER,Program.PASSWD, "scloud-object");
+            string[] root = HTTPClient.getRootContainer(Program.USER, Program.PASSWD, "scloud-container");
+            getContainers(root);
 
-            initLocalObjects(objects);
+            Console.WriteLine("........................................................");
+            Console.WriteLine("初始化本地文件..........................................");
+            Console.WriteLine("........................................................");
 
-            //Thread.Sleep(2000);
+            string[] rootobjects = HTTPClient.getRootContainer(Program.USER, Program.PASSWD, "scloud-object");
+            initLocalObjects(rootobjects);
 
-            getContainers(containers);
+            getObjects(root);
 
-            //Thread.Sleep(2000);
-
-            getObjects(containers);
-
+            Console.WriteLine("........................................................");
+            Console.WriteLine("初始化完毕，可以使用同步盘了，亲，O(∩_∩)O哈哈~");
+            Console.WriteLine("........................................................");
             Program.ui.setIcon("default");
            
         }
@@ -47,25 +50,22 @@ namespace myclouddisk
             for (int i = 0; i < containers.Count(); ++i)
             {
                 string dirPath = Program.MONITOR_PATH + containers[i].Trim();
+
                 if (!Directory.Exists(dirPath))
                 {
                     Directory.CreateDirectory(dirPath);
-                    Console.WriteLine("新建目录："+dirPath);
-
                 }
-                Console.WriteLine("getContainers URI:" + dirPath);
+
                 string[] containers2 = HTTPClient.GET(Program.USER, Program.PASSWD, "scloud_container", "scloud-container", dirPath,1);//1表示返回的是container数组
 
-                if (containers2 == null)
+                if (containers2 == null || containers2.Count() == 0)
                 {
                     continue;
                 }
                         
                 for (int j = 0; j < containers2.Length; ++j)
                 {
-                    Console.WriteLine("Before:"+containers2[j]);
                     containers2[j] = containers[i].Trim() + "/" + containers2[j].Trim();
-                    Console.WriteLine("After:"+containers2[j]);
                 }
                       
                 getContainers(containers2);
@@ -80,29 +80,27 @@ namespace myclouddisk
         private static void getObjects(string[] containers)
         {
             
-            if(containers == null || containers.Length == 0)
+            if(containers == null)
             {
                 return;
             }
 
-            for(int i=0;i<containers.Length;++i)
+            for(int i=0;i<containers.Count();++i)
             {
                 string dirPath = Program.MONITOR_PATH + containers[i].Trim();
 
-                string[] objects = HTTPClient.GET(Program.USER,Program.PASSWD,"scloud_container","scloud-container",dirPath,0);//0表示返回的是null，已经将文件写入本地
+                string[] objects = HTTPClient.GET(Program.USER,Program.PASSWD, "scloud_container", "scloud-container", dirPath, 0);//0表示返回的是null，已经将文件写入本地
 
-                if(objects != null)
+                if(objects != null )
                 {
-                    for(int j=0;j<objects.Length;++j)
-                    {
-
-                        //Console.WriteLine("" + objects[j]); 
+                    for (int j = 0; j < objects.Count(); ++j)
+                    {                       
                         objects[j] = containers[i].Trim() + "/" + objects[j].Trim();
                     }
 
+                    initLocalObjects(objects);
                 }
-
-                initLocalObjects(objects);
+                                          
 
                 string[] containers2 = HTTPClient.GET(Program.USER, Program.PASSWD, "scloud_container", "scloud-container", dirPath,1);//1表示返回的是container数组
 
@@ -114,10 +112,9 @@ namespace myclouddisk
                 for (int j = 0; j < containers2.Length; ++j)
                 {
                     containers2[j] = containers[i].Trim() + "/" + containers2[j].Trim();
-                    Console.WriteLine("containers2:"+containers2[j]);
                 }
 
-                getContainers(containers2);
+                getObjects(containers2);
             }
 
         }
@@ -127,17 +124,14 @@ namespace myclouddisk
         /// <param name="objects">object数组</param>
         private static void initLocalObjects(string[] objects)
         {
-            if(objects == null || objects.Length==0)
+            if(objects == null)
             {
                 return;
             }
             for(int i=0;i<objects.Length;++i)
             {
-                Console.WriteLine("请求object：" + Program.SERVER_URL+"scloud_object/" + objects[i].Trim());
-                //System.Threading.Thread.Sleep(2000);
                 HTTPClient.GETFile(Program.USER, Program.PASSWD, Program.SERVER_URL+ "scloud_object/" + objects[i].Trim());
             }
-            return;
 
         }
         /// <summary>
@@ -145,20 +139,6 @@ namespace myclouddisk
         /// </summary>
         public static void initParameter()
         {
-            //XmlDocument doc = new XmlDocument();
-            //try
-            //{
-            //    doc.Load("config.xml");
-            //    Program.MONITOR_PATH = doc.SelectSingleNode("default/global/monitorpath").ToString();
-            //    Program.SERVER_URL = doc.SelectSingleNode("default/global/serverurl").ToString();
-            //}
-            //catch (System.Xml.XmlException ee)
-            //{
-            //    MessageBox.Show(ee.ToString(), "初始化参数异常", MessageBoxButtons.OK);
-            //    Console.WriteLine(ee);
-            //    Application.Exit();
-
-            //}
             Program.IN_IP = HTTPClient.getLocalIP();
         }
            

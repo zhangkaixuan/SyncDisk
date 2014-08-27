@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 //using Mono.HttpUtility;
 namespace myclouddisk
 {
@@ -11,17 +12,17 @@ namespace myclouddisk
         private static Log log = new Log("log\\httpclient.log");
         public static void Main()
         {
-            //HTTPClient.createUser("20141002", "123456");
+            //HTTPClient.createUser("20141003", "123456");
             //HTTPClient.PUT("admin", "ADMIN", "scloud_container", "scloud-container", @"C:\我的云盘\nihao");
-            //HTTPClient.GET("20141001", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music", 1);
+            //HTTPClient.GET("test", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\soft", 1);
             //HTTPClient.getRootContainer("045130160","123456");
             //HTTPClient.DELETE("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music");
             //HTTPClient.DELETE("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\soft\testtools.zip");
             //HTTPClient.POST("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music","popmusic");
            // HTTPClient.PUT("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\齐秦\月亮代表我的心.Mp3");
            // HTTPClient.getRootContainer("20141001", "123456","scloud-container");
-            //HTTPClient.GETFile("20141001", "123456", @"http://172.20.46.160:8081/scloud_object/document/film.docx");
-            HTTPClient.DELETE("20141001", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\document\film.docx");
+            HTTPClient.GETFile("zhangmanyu", "123456", @"http://192.168.1.113:8081/scloud_object/popmusic/test.txt");
+            //HTTPClient.DELETE("20141001", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\document\film.docx");
 
        
              //string u = "[u'document', u'music', u'soft', u'\u9f50\u79e6']";
@@ -60,19 +61,17 @@ namespace myclouddisk
             request.Headers.Add("X-CDMI-Specification-Version", "v1");
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
-            request.Timeout = 50000;
+            request.Timeout = 10000;
             if (fileType == "scloud_object")
             {
-                //HttpWebRequest req = request;
                 Stream reqStream = null;
                 FileStream fs = null;
                 try
                 {
                     request.AllowWriteStreamBuffering = true;
-                   
-                    // Retrieve request stream 
+
                     reqStream = request.GetRequestStream();
-                    // Open the local file
+
                     //
                     //@TODO
                     //读一个文件之前应该判断是否被其他进程占用
@@ -88,7 +87,6 @@ namespace myclouddisk
                     reqStream.Close();
                     fs.Close();
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
                     Console.WriteLine(response.Headers);
                   
                     return;
@@ -124,9 +122,10 @@ namespace myclouddisk
         /// <param name="HttpURI">一个rest的URI，例如：http://192.168.1.102:8080/music/love.mp3</param>
         public static void GETFile(string user, string password,string HttpURI)
         {
-            Console.WriteLine("请求的文件："+HttpURI);
-
+           
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(HttpURI);
+
+            Console.WriteLine("GET FILE 请求URI：" + request.RequestUri);
 
             log.WriteLine(System.DateTime.Now.ToString() + " GET FILE :" + request.RequestUri);
 
@@ -137,31 +136,36 @@ namespace myclouddisk
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
 
-            request.Timeout = 50000;
+            request.Timeout = 1000*60;
 
             try
             {
+                Thread.Sleep(2000);
                 string localPath = HttpURI.Replace(Program.SERVER_URL+"scloud_object", @"C:\我的云盘");
                 localPath = localPath.Replace("/", @"\");
 
-                Console.WriteLine("写入本地文件：" + localPath);
+                Console.WriteLine("将要写入本地文件：" + localPath);
 
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
                 Console.WriteLine(response.Headers);
+
                 Stream stream = response.GetResponseStream();
+
                 BinaryReader br = new BinaryReader(response.GetResponseStream());
+
                 byte[] inData = new byte[(int)response.ContentLength];
 
                 FileStream fs = new FileStream(localPath, FileMode.OpenOrCreate);
-                inData = new byte[(int)response.ContentLength];
+                
                 BinaryWriter bw = new BinaryWriter(fs);
+
                 bw.Write(inData, 0, inData.Length);
+
                 bw.Flush();
                 bw.Close();
                 fs.Close();
-                br.Close();
-                //stream.Close();
+                stream.Close();
 
             }
 
@@ -184,13 +188,14 @@ namespace myclouddisk
         /// <param name="localPath">文件或者文件夹的绝对路径</param>
         /// <param name="flag">0或者1,0表示要获取文件，会将文件写入到本地相应的位置，1表示返回容器列表</param>
         /// <returns></returns>
-        public static string[] GET(string user, string password, string fileType, string contentType, string localPath,int flag)
+        public static string[] GET(string user, string password, string fileType, string contentType, string localPath ,int flag)
         {
-            Console.WriteLine("请求前的URL："+localPath);
-            Console.WriteLine("GET请求的URI：" + generateHttpURI(fileType, localPath));
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create( generateHttpURI(fileType, localPath));
+            
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(generateHttpURI(fileType, localPath));
 
             log.WriteLine(System.DateTime.Now.ToString() + " GET " + request.RequestUri);
+
+            Console.WriteLine("GET 请求URI：" + request.RequestUri);
 
             request.ContentType = contentType;
             request.Method = "GET";
@@ -199,26 +204,26 @@ namespace myclouddisk
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
 
-            request.Timeout = 50000;
+            request.Timeout = 1000*60;
 
             try
             {
+                Thread.Sleep(2000);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 Console.WriteLine(response.Headers);
-                
-                string[] c = transfer(response.Headers.Get("Containers"));
-                string[] o = transfer(response.Headers.Get("Objects"));
+                string[] c;
+                if (flag == 1)
+                {
+                    c = transfer(response.Headers.Get("Containers"));
+                }
+                else
+                {
+                    c = transfer(response.Headers.Get("Objects"));
+                    Console.WriteLine("**********"+c.ToString());
+                }
 
-                if(c == null && o==null)
-                {
-                    return null;
-                }
-                if (flag == 0)
-                {
-                    return o;
-                }
-                else return c;
-                
+                return c;
+  
             }
             catch (System.Net.WebException ee)
             {
@@ -254,7 +259,7 @@ namespace myclouddisk
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
 
-            request.Timeout = 50000;
+            request.Timeout = 5000;
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -291,7 +296,7 @@ namespace myclouddisk
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
 
-            request.Timeout = 50000;
+            request.Timeout = 5000;
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -328,7 +333,7 @@ namespace myclouddisk
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
 
-            request.Timeout = 50000;
+            request.Timeout = 10000;
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -365,41 +370,16 @@ namespace myclouddisk
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
 
-            request.Timeout = 50000;
+            request.Timeout = 1000*10;
             try
             {
+                Thread.Sleep(2000);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 Console.WriteLine(response.Headers);
-                //Console.WriteLine(utf8Decoding(response.Headers.ToByteArray()));
-                ///
-                ///
-                //string dd = "[u'document', u'music', u'soft', u'\u9f50\u79e6']";
+
                 string cc = response.Headers.Get("Containers");
-                string oo = response.Headers.Get("Objects");
-
-                //Console.WriteLine("dd:" + dd + dd.Length);
-                //Console.WriteLine("cc:" + cc + cc.Length);
-                //Console.WriteLine("oo:" + oo+oo.Length);
-                //Console.WriteLine("pp:"+MyUrlDeCode(cc, null));
-                //if(dd.GetHashCode() == cc.GetHashCode())
-                //{
-                //    Console.WriteLine("哈希一样");
-                //}
-                //Console.WriteLine("xx:"+Encoding.UTF8.GetString(Encoding.Unicode.GetBytes(cc)));
-                ///
-                ///
-                
-
-                Stream stream = response.GetResponseStream();
-                StreamReader sr = new StreamReader(stream ,Encoding.UTF8);
-                string content = sr.ReadToEnd();
-                transfer(content);
-
-                //Console.WriteLine("响应体："+content);
-                sr.Close();
-          
-                
-
+                string oo = response.Headers.Get("Objects");     
+     
                 string[] c = transfer(cc);
                 string[] o = transfer(oo);
 
@@ -454,17 +434,7 @@ namespace myclouddisk
             //Console.WriteLine("转化URI：" + localPath + " -> " + newuri);
             return uri;
         }
-        public static byte[] utf8Encoding(string unicodeString)
-        {
-           
-            Byte[] encodedBytes = Encoding.GetEncoding("gb2312").GetBytes(unicodeString);
-            return encodedBytes;
-        }
-        public static string utf8Decoding(byte[] encodedBytes)
-        {
-            String decodedString = new UTF8Encoding().GetString(encodedBytes);
-            return decodedString;
-        }
+     
         public static string[] transfer(string original)
         {
             if (original == null)
@@ -476,15 +446,8 @@ namespace myclouddisk
             }
             string str1 = original.Replace("[", "").Replace("]", "").Trim();
             string str2 = str1.Replace("u'", "").Replace("'", "").Trim();
-            //Console.WriteLine("这里是转化后的结果" + str2);
 
             String[] last = str2.Split(',');
-
-            foreach(string s in last)
-            {
-                //test(s);
-                //Console.WriteLine("{0}", s);
-            }
             return last;
         }
         
