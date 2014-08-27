@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections;
 using System.IO;
-using System.Xml;
-using System.Windows.Forms;
+using System.Linq;
+using System.Threading;
 namespace myclouddisk
 {
     class RsyncService
@@ -20,10 +15,20 @@ namespace myclouddisk
 
             Console.WriteLine("初始化本地目录.....");
             Program.ui.setIcon("sync");
+
             string[] containers = HTTPClient.getRootContainer(Program.USER,Program.PASSWD,"scloud-container");
             string[] objects = HTTPClient.getRootContainer(Program.USER,Program.PASSWD, "scloud-object");
+
+            initLocalObjects(objects);
+
+            //Thread.Sleep(2000);
+
             getContainers(containers);
+
+            //Thread.Sleep(2000);
+
             getObjects(containers);
+
             Program.ui.setIcon("default");
            
         }
@@ -45,9 +50,10 @@ namespace myclouddisk
                 if (!Directory.Exists(dirPath))
                 {
                     Directory.CreateDirectory(dirPath);
+                    Console.WriteLine("新建目录："+dirPath);
 
                 }
-                Console.WriteLine("URI:"+dirPath);
+                Console.WriteLine("getContainers URI:" + dirPath);
                 string[] containers2 = HTTPClient.GET(Program.USER, Program.PASSWD, "scloud_container", "scloud-container", dirPath,1);//1表示返回的是container数组
 
                 if (containers2 == null)
@@ -57,7 +63,9 @@ namespace myclouddisk
                         
                 for (int j = 0; j < containers2.Length; ++j)
                 {
+                    Console.WriteLine("Before:"+containers2[j]);
                     containers2[j] = containers[i].Trim() + "/" + containers2[j].Trim();
+                    Console.WriteLine("After:"+containers2[j]);
                 }
                       
                 getContainers(containers2);
@@ -88,7 +96,7 @@ namespace myclouddisk
                     for(int j=0;j<objects.Length;++j)
                     {
 
-                        Console.WriteLine("object*********" + objects[j]); 
+                        //Console.WriteLine("" + objects[j]); 
                         objects[j] = containers[i].Trim() + "/" + objects[j].Trim();
                     }
 
@@ -106,7 +114,7 @@ namespace myclouddisk
                 for (int j = 0; j < containers2.Length; ++j)
                 {
                     containers2[j] = containers[i].Trim() + "/" + containers2[j].Trim();
-                    //Console.WriteLine("containers2::"+containers2[j]);
+                    Console.WriteLine("containers2:"+containers2[j]);
                 }
 
                 getContainers(containers2);
@@ -125,8 +133,8 @@ namespace myclouddisk
             }
             for(int i=0;i<objects.Length;++i)
             {
-                Console.WriteLine("文件：" + objects[i]);
                 Console.WriteLine("请求object：" + Program.SERVER_URL+"scloud_object/" + objects[i].Trim());
+                //System.Threading.Thread.Sleep(2000);
                 HTTPClient.GETFile(Program.USER, Program.PASSWD, Program.SERVER_URL+ "scloud_object/" + objects[i].Trim());
             }
             return;

@@ -7,7 +7,7 @@ namespace myclouddisk
 {
     class Monitor
     {
-        //public Log log;
+        private static Log log = new Log("log\\monitor.log");
         internal static void startUp(String path)
         {
             MyFileSystemWather myWather;
@@ -72,10 +72,10 @@ namespace myclouddisk
             eve.FileType = GetFileType(e.FullPath);
             FileType type = eve.FileType;
            
-            Log log = new Log("log.txt");
             log.WriteLine(eve.GenerateTime.ToUniversalTime() +" [new a " + type + "] " + e.FullPath);
+
             Program.eventBuffer.Enqueue(eve);
-            Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [new a " + type + "] " + e.FullPath);
+            //Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [new a " + type + "] " + e.FullPath);
         }
 
         private static void OnChanged(object source, FileSystemEventArgs e)
@@ -93,11 +93,10 @@ namespace myclouddisk
                 eve.NewFullPath = e.FullPath;
                 eve.NewName = e.Name;
                 eve.OpertionType = OperationType.MODIFY;
-                Log log = new Log("log.txt");
                 log.WriteLine(eve.GenerateTime.ToUniversalTime()+" [modify a FILE] " + e.FullPath);
                 Program.eventBuffer.Enqueue(eve);
 
-                Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [modify a FILE]"+e.FullPath);
+                //Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [modify a FILE]"+e.FullPath);
 
             }
         }
@@ -112,11 +111,10 @@ namespace myclouddisk
             eve.NewFullPath = e.FullPath;
             eve.NewName = e.Name;
             eve.OpertionType = OperationType.DELETE;
-            Log log = new Log("log.txt");
             log.WriteLine(eve.GenerateTime.ToUniversalTime()+" [delete an OBJECT] " + e.FullPath);
             Program.eventBuffer.Enqueue(eve);
 
-            Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [delete an OBJECT] " + e.FullPath);
+            //Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [delete an OBJECT] " + e.FullPath);
         
         }
         private static void OnRenamed(object source, RenamedEventArgs e)
@@ -135,11 +133,10 @@ namespace myclouddisk
                 eve.FileType = GetFileType(e.FullPath);
                 FileType type = eve.FileType;
 
-                Log log = new Log("log.txt");
                 log.WriteLine(eve.GenerateTime.ToUniversalTime() +" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
                 Program.eventBuffer.Enqueue(eve);
 
-                Console.WriteLine(eve.GenerateTime.ToUniversalTime() +" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
+                //Console.WriteLine(eve.GenerateTime.ToUniversalTime() +" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
                 return;
             }
             if (DocumentIsChanged(e.Name))
@@ -156,10 +153,10 @@ namespace myclouddisk
                 eve.OpertionType = OperationType.RENAME;
                 eve.FileType = GetFileType(e.FullPath);
                 FileType type = eve.FileType;
-                Log log = new Log("log.txt");
+
                 log.WriteLine(eve.GenerateTime.ToUniversalTime()+" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
                 Program.eventBuffer.Enqueue(eve);
-                Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
+                //Console.WriteLine(eve.GenerateTime.ToUniversalTime()+" [rename a " + type + "] " + e.OldFullPath + " [rename as] " + e.FullPath);
 
             }
 

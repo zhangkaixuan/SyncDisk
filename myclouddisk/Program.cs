@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Drawing;
-using System.Threading;
 using System.IO;
+using System.Threading;
+using System.Windows.Forms;
 namespace myclouddisk
 {
     /// <summary>
@@ -31,11 +28,12 @@ namespace myclouddisk
         public static bool flag = false;
 
         public static string MONITOR_PATH = @"C:\我的云盘\";
-        public static string USER = "045130160";
+        public static string USER = "20141001";
         public static string PASSWD = "123456";
-        public static string SERVER_URL = "http://192.168.1.113:8080/";
+        public static string SERVER_URL = "http://172.20.46.160:8081/";
         public static string IN_IP;
         public static string PUB_IP = "";
+        public static string HOST = "cloud.ecust.cn.edu";
         /// <summary>
         /// 程序入口，即主函数
         /// </summary>

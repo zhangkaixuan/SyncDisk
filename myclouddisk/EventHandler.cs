@@ -13,6 +13,7 @@ namespace myclouddisk
     {
         private ArrayList dirlist = new ArrayList();
         private ArrayList filelist = new ArrayList();
+        private Log log = new Log("log\\eventhandler.log");
         /// <summary>
         /// 处理用户产生的文件操作事件
         /// </summary>
@@ -188,9 +189,12 @@ namespace myclouddisk
                 contentType = "scloud-object";
                 fileType = "scloud_object";
             }
-            HTTPClient.PUT("045130160", "123456", fileType, contentType, localPath);
 
-            Console.WriteLine("已同步：新建"+"["+e.FileType+"]"+"["+e.NewFullPath+"]");
+            log.WriteLine(System.DateTime.Now.ToString() + " 事件处理器已受理：新建" + "[" + e.FileType + "]" + "[" + e.NewFullPath + "]");
+            HTTPClient.PUT(Program.USER, Program.PASSWD, fileType, contentType, localPath);
+            //Thread.Sleep(2000);
+
+            
         }
         private void rename(FileEvent e)
         {
@@ -206,29 +210,40 @@ namespace myclouddisk
                 contentType = "scloud-object";
                 fileType = "scloud_object";
             }
-            HTTPClient.POST("045130160","123456",fileType,contentType,oldFullPath,newName);
+
+            log.WriteLine(System.DateTime.Now.ToString()+" 事件处理器已受理：重命名 " + "[" + e.OldFullPath + "]" + "[" + e.NewFullPath + "]");
+            HTTPClient.POST(Program.USER, Program.PASSWD, fileType, contentType, oldFullPath, newName);
+            //Thread.Sleep(2000);
                        
-            Console.WriteLine("已同步：重命名" + "[" + e.OldFullPath + "]" + "[" + e.NewFullPath + "]");
+            
         }
         private void modify(FileEvent e)
         {
-            delete(e);
-            create(e);
-            Console.WriteLine("已同步：修改[FILE]"  + "[" + e.NewFullPath + "]");
+
+            log.WriteLine(System.DateTime.Now.ToString() + " 事件处理器已受理：修改[FILE]" + "[" + e.NewFullPath + "]");
+            //delete(e);
+            //create(e);
+            
         }
         private void delete(FileEvent e)
         {
             string contentType = "scloud-container";
             string fileType = "scloud_container";
             string localPath = e.NewFullPath;
-          
-           if( HTTPClient.DELETE("045130160","123456",fileType,contentType,localPath))
-           {
-               return;
-           }
-            HTTPClient.DELETE("045130160", "123456", "scloud_object", "scloud-object", localPath);
 
-            Console.WriteLine("已同步：删除对象" + "[" + e.NewFullPath + "]");
+            log.WriteLine(System.DateTime.Now.ToString() + " 事件处理器已受理：删除对象" + "[" + e.NewFullPath + "]");
+            string[] path = e.NewFullPath.Split('\\');
+            if(path[path.Length-1].IndexOf('.') > -1)//是文件
+            {
+                HTTPClient.DELETE(Program.USER, Program.PASSWD, "scloud_object", "scloud-object", localPath);
+                return;
+            }
+
+            HTTPClient.DELETE(Program.USER, Program.PASSWD, fileType, contentType, localPath);
+           
+            //Thread.Sleep(2000);
+
+           
         }
     }
 }
