@@ -28,7 +28,7 @@ namespace myclouddisk
         public static bool flag = false;
 
         public static string MONITOR_PATH = @"C:\我的云盘\";
-        public static string USER = "zhangmanyu";
+        public static string USER = "zhangkaixuan";
         public static string PASSWD = "123456";
         //public static string SERVER_URL = "http://172.20.46.160:8081/";
         public static string SERVER_URL = "http://192.168.1.113:8081/";

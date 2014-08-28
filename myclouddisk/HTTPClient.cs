@@ -12,7 +12,7 @@ namespace myclouddisk
         private static Log log = new Log("log\\httpclient.log");
         public static void Main()
         {
-            //HTTPClient.createUser("20141003", "123456");
+            HTTPClient.createUser("zhangkaixuan", "123456");
             //HTTPClient.PUT("admin", "ADMIN", "scloud_container", "scloud-container", @"C:\我的云盘\nihao");
             //HTTPClient.GET("test", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\soft", 1);
             //HTTPClient.getRootContainer("045130160","123456");
@@ -20,8 +20,8 @@ namespace myclouddisk
             //HTTPClient.DELETE("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\soft\testtools.zip");
             //HTTPClient.POST("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music","popmusic");
            // HTTPClient.PUT("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\齐秦\月亮代表我的心.Mp3");
-           // HTTPClient.getRootContainer("20141001", "123456","scloud-container");
-            HTTPClient.GETFile("zhangmanyu", "123456", @"http://192.168.1.113:8081/scloud_object/popmusic/test.txt");
+            //HTTPClient.getRootContainer("zhangmanyu", "123456", "scloud-container");
+            //HTTPClient.GETFile("zhangmanyu", "123456", @"http://192.168.1.113:8081/scloud_object/popmusic/test.txt");
             //HTTPClient.DELETE("20141001", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\document\film.docx");
 
        
@@ -68,24 +68,24 @@ namespace myclouddisk
                 FileStream fs = null;
                 try
                 {
-                    request.AllowWriteStreamBuffering = true;
-
-                    reqStream = request.GetRequestStream();
-
-                    //
+                     //
                     //@TODO
                     //读一个文件之前应该判断是否被其他进程占用
                     //
-                    fs = new FileStream(localPath,FileMode.Open,FileAccess.ReadWrite);
+                    fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
          
                     BinaryReader br = new BinaryReader(fs);
 
                     byte[] inData = br.ReadBytes((int)fs.Length);
+                    request.ContentLength = inData.Length;
 
+                    request.AllowWriteStreamBuffering = true;
+                    reqStream = request.GetRequestStream();
                     reqStream.Write(inData,0,inData.Length);
                     br.Close();
                     reqStream.Close();
                     fs.Close();
+
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                     Console.WriteLine(response.Headers);
                   
@@ -154,7 +154,7 @@ namespace myclouddisk
 
                 BinaryReader br = new BinaryReader(response.GetResponseStream());
 
-                byte[] inData = new byte[(int)response.ContentLength];
+                byte[] inData = br.ReadBytes((int)response.ContentLength);               
 
                 FileStream fs = new FileStream(localPath, FileMode.OpenOrCreate);
                 
@@ -162,10 +162,9 @@ namespace myclouddisk
 
                 bw.Write(inData, 0, inData.Length);
 
-                bw.Flush();
                 bw.Close();
                 fs.Close();
-                stream.Close();
+                //stream.Close();
 
             }
 
@@ -192,7 +191,7 @@ namespace myclouddisk
         {
             
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(generateHttpURI(fileType, localPath));
-
+            
             log.WriteLine(System.DateTime.Now.ToString() + " GET " + request.RequestUri);
 
             Console.WriteLine("GET 请求URI：" + request.RequestUri);
@@ -211,18 +210,25 @@ namespace myclouddisk
                 Thread.Sleep(2000);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 Console.WriteLine(response.Headers);
-                string[] c;
+
+                Stream stream = response.GetResponseStream();
+
+                BinaryReader br = new BinaryReader(response.GetResponseStream());
+
+                byte[] buffer = br.ReadBytes((int)response.ContentLength);
+
+                Console.WriteLine(buffer.Length);
+
+                string text = Encoding.UTF8.GetString(buffer);
+
+                br.Close();
+                stream.Close();
+            
                 if (flag == 1)
                 {
-                    c = transfer(response.Headers.Get("Containers"));
+                    return transfer(text, 0);
                 }
-                else
-                {
-                    c = transfer(response.Headers.Get("Objects"));
-                    Console.WriteLine("**********"+c.ToString());
-                }
-
-                return c;
+                else return transfer(text, 1);
   
             }
             catch (System.Net.WebException ee)
@@ -254,6 +260,8 @@ namespace myclouddisk
             request.Method = "POST";
             request.Headers.Add("Authorization", user + ":" + password);
             request.Headers.Add("X-CDMI-Specification-Version", "v1");
+            //
+            //重命名为中文出错？？
             request.Headers.Add("current-name", newName);
 
             request.Host = Program.HOST;
@@ -376,18 +384,23 @@ namespace myclouddisk
                 Thread.Sleep(2000);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 Console.WriteLine(response.Headers);
+                Stream stream = response.GetResponseStream();
 
-                string cc = response.Headers.Get("Containers");
-                string oo = response.Headers.Get("Objects");     
-     
-                string[] c = transfer(cc);
-                string[] o = transfer(oo);
+                BinaryReader br = new BinaryReader(response.GetResponseStream());
 
-                if (contentType == "scloud-object")
-                {
-                    return o;
+                byte[] buffer = br.ReadBytes((int)response.ContentLength);
+
+                Console.WriteLine(buffer.Length);
+
+                string text = Encoding.UTF8.GetString(buffer);
+                
+                br.Close();
+                stream.Close();
+                if (contentType == "scloud-container")
+                {   
+                    return transfer(text, 0);
                 }
-                else return c;
+                else return transfer(text, 1);
             }
             catch (System.Net.WebException ee)
             {
@@ -410,7 +423,6 @@ namespace myclouddisk
             {
                 if (myHost.AddressList[i].ToString().IndexOf("10") > -1 || myHost.AddressList[i].ToString().IndexOf("192") > -1)
                 {
-
                     Console.WriteLine("本机ip："+myHost.AddressList[i].ToString());
                     return myHost.AddressList[i].ToString();
                 }
@@ -434,23 +446,29 @@ namespace myclouddisk
             //Console.WriteLine("转化URI：" + localPath + " -> " + newuri);
             return uri;
         }
-     
-        public static string[] transfer(string original)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="original"></param>
+        /// <param name="contentType"></param>
+        /// <returns></returns>
+        public static string[] transfer(string original, int contentType)
         {
-            if (original == null)
-                return null;
-            string str0 = original.Replace("[", "").Replace("]", "");
-            if(str0 == "" || str0 ==null)
+            string[] s = original.Split('#');
+            if(s.Length<2 && contentType ==1)
             {
                 return null;
             }
-            string str1 = original.Replace("[", "").Replace("]", "").Trim();
-            string str2 = str1.Replace("u'", "").Replace("'", "").Trim();
 
-            String[] last = str2.Split(',');
-            return last;
+            string s2 = s[contentType].Replace("[", "").Replace("]", "").Trim();
+       
+            if( s2 == "" )
+            {
+                return null;
+            }
+            string[] s3 = s2.Split(',');
+
+            return s3;
         }
-        
-
     }
 }

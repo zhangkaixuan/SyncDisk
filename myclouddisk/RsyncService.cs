@@ -24,8 +24,8 @@ namespace myclouddisk
             Console.WriteLine("初始化本地文件..........................................");
             Console.WriteLine("........................................................");
 
-            string[] rootobjects = HTTPClient.getRootContainer(Program.USER, Program.PASSWD, "scloud-object");
-            initLocalObjects(rootobjects);
+            //string[] rootobjects = HTTPClient.getRootContainer(Program.USER, Program.PASSWD, "scloud-object");
+            //initLocalObjects(rootobjects);
 
             getObjects(root);
 
@@ -130,6 +130,11 @@ namespace myclouddisk
             }
             for(int i=0;i<objects.Length;++i)
             {
+                if (objects[i].Trim() == "")
+                {
+                    continue;
+                }
+                Console.WriteLine("我请求文件：" + objects[i].Trim() +"结束啦");
                 HTTPClient.GETFile(Program.USER, Program.PASSWD, Program.SERVER_URL+ "scloud_object/" + objects[i].Trim());
             }
 
