@@ -1,4 +1,15 @@
-﻿using System;
+﻿/*********************************************
+ *                                           *
+ * Copyright （C） 2014-2014 zhangkaixuan    *
+ * All rights reserved                       *
+ * Project Name : myclouddisk                *
+ * Create Time : 2014-08-13                  *
+ * Author : zhangkaixuan                     *
+ * Contact Author : zhangkxuan@gmail.com     *
+ * Version : v1.0                            *
+ *                                           *
+ * ******************************************/
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -24,6 +35,8 @@ namespace myclouddisk
             Console.WriteLine("初始化本地文件..........................................");
             Console.WriteLine("........................................................");
 
+            //
+            //服务器端存在bug，无法在根目录创建文件
             //string[] rootobjects = HTTPClient.getRootContainer(Program.USER, Program.PASSWD, "scloud-object");
             //initLocalObjects(rootobjects);
 
@@ -76,7 +89,6 @@ namespace myclouddisk
         /// 初始化本地文件，本方法仅仅用于程序初始化本地文件用
         /// </summary>
         /// <param name="containers">含目录名称的数组</param>
-
         private static void getObjects(string[] containers)
         {
             
@@ -134,7 +146,7 @@ namespace myclouddisk
                 {
                     continue;
                 }
-                Console.WriteLine("我请求文件：" + objects[i].Trim() +"结束啦");
+                //Console.WriteLine("我请求文件：" + Program.SERVER_URL + "scloud_object/" + objects[i].Trim());
                 HTTPClient.GETFile(Program.USER, Program.PASSWD, Program.SERVER_URL+ "scloud_object/" + objects[i].Trim());
             }
 

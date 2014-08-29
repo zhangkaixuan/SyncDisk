@@ -1,4 +1,15 @@
-﻿using System;
+﻿/*********************************************
+ *                                           *
+ * Copyright （C） 2014-2014 zhangkaixuan    *
+ * All rights reserved                       *
+ * Project Name : myclouddisk                *
+ * Create Time : 2014-08-13                  *
+ * Author : zhangkaixuan                     *
+ * Contact Author : zhangkxuan@gmail.com     *
+ * Version : v1.0                            *
+ *                                           *
+ * ******************************************/
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -28,7 +39,7 @@ namespace myclouddisk
         public static bool flag = false;
 
         public static string MONITOR_PATH = @"C:\我的云盘\";
-        public static string USER = "zhangkaixuan";
+        public static string USER = "one";
         public static string PASSWD = "123456";
         //public static string SERVER_URL = "http://172.20.46.160:8081/";
         public static string SERVER_URL = "http://192.168.1.113:8081/";
@@ -54,12 +65,12 @@ namespace myclouddisk
         {
             RsyncService.initParameter();//初始化参数
 
-            ui = new UI(MONITOR_PATH);//载入UI
-            
             if (!Directory.Exists(MONITOR_PATH))//监察被监视目录是否存在
             {
                 Directory.CreateDirectory(MONITOR_PATH);
             }
+
+            ui = new UI(MONITOR_PATH);//载入UI
 
             RsyncService.InitLocalDirectory();//初始化本地目录
 

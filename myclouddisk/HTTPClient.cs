@@ -1,4 +1,15 @@
-﻿using System;
+﻿/*********************************************
+ *                                           *
+ * Copyright （C） 2014-2014 zhangkaixuan    *
+ * All rights reserved                       *
+ * Project Name : myclouddisk                *
+ * Create Time : 2014-08-13                  *
+ * Author : zhangkaixuan                     *
+ * Contact Author : zhangkxuan@gmail.com     *
+ * Version : v1.0                            *
+ *                                           *
+ * ******************************************/
+using System;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -7,39 +18,28 @@ using System.Threading;
 //using Mono.HttpUtility;
 namespace myclouddisk
 {
+    /// <summary>
+    /// 封装了常用的发送http请求的client
+    /// </summary>
     class HTTPClient
     {
         private static Log log = new Log("log\\httpclient.log");
+        /// <summary>
+        /// 测试用
+        /// </summary>
         public static void Main()
         {
-            HTTPClient.createUser("zhangkaixuan", "123456");
+            //HTTPClient.createUser("one", "123456");
             //HTTPClient.PUT("admin", "ADMIN", "scloud_container", "scloud-container", @"C:\我的云盘\nihao");
             //HTTPClient.GET("test", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\soft", 1);
-            //HTTPClient.getRootContainer("045130160","123456");
+
             //HTTPClient.DELETE("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music");
             //HTTPClient.DELETE("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\soft\testtools.zip");
-            //HTTPClient.POST("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music","popmusic");
-           // HTTPClient.PUT("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\齐秦\月亮代表我的心.Mp3");
+            HTTPClient.POST("one", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\新建文件夹", "我的人生");
+            //HTTPClient.PUT("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\齐秦\月亮代表我的心.Mp3");
             //HTTPClient.getRootContainer("zhangmanyu", "123456", "scloud-container");
             //HTTPClient.GETFile("zhangmanyu", "123456", @"http://192.168.1.113:8081/scloud_object/popmusic/test.txt");
             //HTTPClient.DELETE("20141001", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\document\film.docx");
-
-       
-             //string u = "[u'document', u'music', u'soft', u'\u9f50\u79e6']";
-             //transfer(u);
-            //string s = "[u'document', u'music', u'soft', u'\u9f50\u79e6']";
-            // string d = s;
-            // string soo = "\\ihao";
-            //char c = '\u9f50';
-            //Console.WriteLine(c);
-
-            // Encoding.GetEncoding("gb2312").GetBytes(s);
-                
-            // Console.WriteLine(s+d+soo);
-           // Console.WriteLine("http://192.168.1.113:8080/scloud_container/\u9f50\u79e6");
-            
-             //Console.WriteLine(MyUrlDeCode("http://192.168.1.113:8080/scloud_container/\u65b0\u5efa\u6587\u4ef6\u5939", null));
-
         }
         /// <summary>
         /// PUT资源操作
@@ -68,7 +68,7 @@ namespace myclouddisk
                 FileStream fs = null;
                 try
                 {
-                     //
+                    Thread.Sleep(1000);
                     //@TODO
                     //读一个文件之前应该判断是否被其他进程占用
                     //
@@ -85,7 +85,7 @@ namespace myclouddisk
                     br.Close();
                     reqStream.Close();
                     fs.Close();
-
+                   
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                     Console.WriteLine(response.Headers);
                   
@@ -119,7 +119,7 @@ namespace myclouddisk
         /// </summary>
         /// <param name="user">用户名</param>
         /// <param name="password">密码</param>
-        /// <param name="HttpURI">一个rest的URI，例如：http://192.168.1.102:8080/music/love.mp3</param>
+        /// <param name="HttpURI">一个rest的URI，例如：http://192.168.1.102:8080/music/love.mp3 </param>
         public static void GETFile(string user, string password,string HttpURI)
         {
            
@@ -217,12 +217,10 @@ namespace myclouddisk
 
                 byte[] buffer = br.ReadBytes((int)response.ContentLength);
 
-                Console.WriteLine(buffer.Length);
-
                 string text = Encoding.UTF8.GetString(buffer);
-
+         
                 br.Close();
-                stream.Close();
+                //stream.Close();
             
                 if (flag == 1)
                 {
@@ -249,7 +247,6 @@ namespace myclouddisk
         /// <param name="contentType">例如：scloud-object</param>
         /// <param name="oldFullPath">旧的文件夹或者文件绝对路径</param>
         /// <param name="newName">新名字</param>
-
         public static void POST(string user, string password, string fileType, string contentType, string oldFullPath, string newName)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(generateHttpURI(fileType,oldFullPath));
@@ -260,9 +257,27 @@ namespace myclouddisk
             request.Method = "POST";
             request.Headers.Add("Authorization", user + ":" + password);
             request.Headers.Add("X-CDMI-Specification-Version", "v1");
-            //
-            //重命名为中文出错？？
-            request.Headers.Add("current-name", newName);
+            ///
+            /// 
+            /// 
+            ///
+            string utf8_str = "";
+            byte[] buffer = Encoding.GetEncoding("GBK").GetBytes(newName.Trim()); 
+            utf8_str = Encoding.UTF8.GetString(buffer);
+            Console.WriteLine("POST 参数转化成UTF8："+utf8_str);
+            try
+            {
+                request.Headers.Add("current-name", utf8_str);
+                
+            }
+            catch(System.ArgumentException ee)
+            {
+                log.WriteLine("POST 参数异常 :" + ee);
+                System.Console.WriteLine("POST 参数异常 :" + ee);
+                System.Console.WriteLine("POST 非法的参数 :" + newName);
+                return;
+            }
+            
 
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
@@ -341,7 +356,7 @@ namespace myclouddisk
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
 
-            request.Timeout = 10000;
+            request.Timeout = 1000*10;
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -390,12 +405,10 @@ namespace myclouddisk
 
                 byte[] buffer = br.ReadBytes((int)response.ContentLength);
 
-                Console.WriteLine(buffer.Length);
-
                 string text = Encoding.UTF8.GetString(buffer);
                 
                 br.Close();
-                stream.Close();
+                //stream.Close();
                 if (contentType == "scloud-container")
                 {   
                     return transfer(text, 0);
@@ -447,10 +460,10 @@ namespace myclouddisk
             return uri;
         }
         /// <summary>
-        /// 
+        /// 对响应体进行分析
         /// </summary>
-        /// <param name="original"></param>
-        /// <param name="contentType"></param>
+        /// <param name="original">待分析的字符串</param>
+        /// <param name="contentType">0表示返回container数组，1，表示返回objects数组</param>
         /// <returns></returns>
         public static string[] transfer(string original, int contentType)
         {

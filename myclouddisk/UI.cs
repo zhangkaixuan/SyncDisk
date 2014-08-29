@@ -1,9 +1,23 @@
-﻿using System;
+﻿/*********************************************
+ *                                           *
+ * Copyright （C） 2014-2014 zhangkaixuan    *
+ * All rights reserved                       *
+ * Project Name : myclouddisk                *
+ * Create Time : 2014-08-13                  *
+ * Author : zhangkaixuan                     *
+ * Contact Author : zhangkxuan@gmail.com     *
+ * Version : v1.0                            *
+ *                                           *
+ * ******************************************/
+using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 namespace myclouddisk
 {
+    /// <summary>
+    /// 主界面
+    /// </summary>
     class UI
     {
         private System.Windows.Forms.NotifyIcon notifyIcon;
@@ -33,7 +47,7 @@ namespace myclouddisk
             // notifyIcon
             // 
             notifyIcon.ContextMenuStrip = this.menu;
-            notifyIcon.Text = "程序正在初始化中，请稍后使用";
+            notifyIcon.Text = "正在从云端拉取数据到本地，请稍后...";
            
             notifyIcon.Icon = iNotify;
             this.notifyIcon.MouseDown += new System.Windows.Forms.MouseEventHandler(notify_Click);//为系统托盘添加鼠标事件监听
@@ -99,9 +113,9 @@ namespace myclouddisk
 
             }
             else if (Program.status == RsyncStatus.STARTING)
-                this.notifyIcon.Text = "程序正在启动中";
+                this.notifyIcon.Text = "程序正在启动中...";
             else if (Program.status == RsyncStatus.RSYNCING)
-                this.notifyIcon.Text = "文件正在同步中";
+                this.notifyIcon.Text = "文件正在同步中...";
             else
                 this.notifyIcon.Text = "无法获取程序状态";
 

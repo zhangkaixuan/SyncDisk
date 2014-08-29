@@ -1,6 +1,20 @@
-﻿using System.IO;
+﻿/*********************************************
+ *                                           *
+ * Copyright （C） 2014-2014 zhangkaixuan    *
+ * All rights reserved                       *
+ * Project Name : myclouddisk                *
+ * Create Time : 2014-08-13                  *
+ * Author : zhangkaixuan                     *
+ * Contact Author : zhangkxuan@gmail.com     *
+ * Version : v1.0                            *
+ *                                           *
+ * ******************************************/
+using System.IO;
 namespace myclouddisk
 {
+    /// <summary>
+    /// 监控器，为了多线程监控
+    /// </summary>
     public class WatcherProcess
     {
         private object sender;

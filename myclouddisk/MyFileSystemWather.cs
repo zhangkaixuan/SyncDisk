@@ -1,11 +1,22 @@
-﻿using System;
+﻿/*********************************************
+ *                                           *
+ * Copyright （C） 2014-2014 zhangkaixuan    *
+ * All rights reserved                       *
+ * Project Name : myclouddisk                *
+ * Create Time : 2014-08-13                  *
+ * Author : zhangkaixuan                     *
+ * Contact Author : zhangkxuan@gmail.com     *
+ * Version : v1.0                            *
+ *                                           *
+ * ******************************************/
+using System;
 using System.Collections;
 using System.IO;
 using System.Threading;
 
 namespace myclouddisk
 {
-    public delegate void Completed(string key);
+    public delegate void Completed(string key);//委托
     public class MyFileSystemWather
     {
         private FileSystemWatcher fsWather;
@@ -32,7 +43,7 @@ namespace myclouddisk
             fsWather = new FileSystemWatcher(path);
             // 是否监控子目录
             fsWather.IncludeSubdirectories = true;
-            fsWather.InternalBufferSize = 1024 * 64;
+            fsWather.InternalBufferSize = 1024 * 64;//设置缓冲区，最大为64KB
             fsWather.Filter = filter;
             fsWather.Renamed += new RenamedEventHandler(fsWather_Renamed);
             fsWather.Changed += new FileSystemEventHandler(fsWather_Changed);

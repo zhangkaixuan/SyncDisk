@@ -5,8 +5,7 @@ using System.Text;
 
 namespace myclouddisk
 {
-    class Object
+    class Class
     {
-       
     }
 }

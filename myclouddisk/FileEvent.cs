@@ -1,4 +1,15 @@
-﻿using System;
+﻿/*********************************************
+ *                                           *
+ * Copyright （C） 2014-2014 zhangkaixuan    *
+ * All rights reserved                       *
+ * Project Name : myclouddisk                *
+ * Create Time : 2014-08-13                  *
+ * Author : zhangkaixuan                     *
+ * Contact Author : zhangkxuan@gmail.com     *
+ * Version : v1.0                            *
+ *                                           *
+ * ******************************************/
+using System;
 
 namespace myclouddisk
 {
@@ -91,10 +102,5 @@ namespace myclouddisk
             this.newFullPath = newFullPath;
             this.generateTime = generateTime;
         }
-        public bool syncOperation()
-        {
-            return true;
-        }
-
     }
 }
