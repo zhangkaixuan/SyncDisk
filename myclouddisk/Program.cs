@@ -39,10 +39,10 @@ namespace myclouddisk
         public static bool flag = false;
 
         public static string MONITOR_PATH = @"C:\我的云盘\";
-        public static string USER = "one";
+        public static string USER = "045130160";
         public static string PASSWD = "123456";
-        //public static string SERVER_URL = "http://172.20.46.160:8081/";
-        public static string SERVER_URL = "http://192.168.1.113:8081/";
+        public static string SERVER_URL = "http://172.20.46.160:8081/";
+        //public static string SERVER_URL = "http://192.168.1.113:8081/";
         public static string IN_IP;
         public static string PUB_IP = "";
         public static string HOST = "cloud.ecust.edu.cn";

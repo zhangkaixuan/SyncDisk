@@ -29,15 +29,15 @@ namespace myclouddisk
         /// </summary>
         public static void Main()
         {
-            //HTTPClient.createUser("one", "123456");
-            //HTTPClient.PUT("admin", "ADMIN", "scloud_container", "scloud-container", @"C:\我的云盘\nihao");
+            //HTTPClient.createUser("", "123456");
+            //HTTPClient.PUT("dang", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\测试文件夹");
             //HTTPClient.GET("test", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\soft", 1);
 
             //HTTPClient.DELETE("045130160", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\music");
             //HTTPClient.DELETE("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\soft\testtools.zip");
-            HTTPClient.POST("one", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\新建文件夹", "我的人生");
-            //HTTPClient.PUT("045130160", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\齐秦\月亮代表我的心.Mp3");
-            //HTTPClient.getRootContainer("zhangmanyu", "123456", "scloud-container");
+            HTTPClient.POST("dang", "123456", "scloud_container", "scloud-container", @"C:\我的云盘\测试文件夹", "我的人生");
+            //HTTPClient.PUT("one", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\nihao.txt");
+            //HTTPClient.getRootContainer("one", "123456", "scloud-container");
             //HTTPClient.GETFile("zhangmanyu", "123456", @"http://192.168.1.113:8081/scloud_object/popmusic/test.txt");
             //HTTPClient.DELETE("20141001", "123456", "scloud_object", "scloud-object", @"C:\我的云盘\document\film.docx");
         }
@@ -164,7 +164,7 @@ namespace myclouddisk
 
                 bw.Close();
                 fs.Close();
-                //stream.Close();
+                stream.Close();
 
             }
 
@@ -205,13 +205,15 @@ namespace myclouddisk
 
             request.Timeout = 1000*60;
 
+            Stream stream = null;
+
             try
             {
                 Thread.Sleep(2000);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 Console.WriteLine(response.Headers);
 
-                Stream stream = response.GetResponseStream();
+                stream = response.GetResponseStream();
 
                 BinaryReader br = new BinaryReader(response.GetResponseStream());
 
@@ -220,8 +222,8 @@ namespace myclouddisk
                 string text = Encoding.UTF8.GetString(buffer);
          
                 br.Close();
-                //stream.Close();
-            
+ 
+                
                 if (flag == 1)
                 {
                     return transfer(text, 0);
@@ -236,7 +238,6 @@ namespace myclouddisk
                 Console.WriteLine( ee);
                 return null;
             }
-
         }
         /// <summary>
         /// 重命名
@@ -249,7 +250,9 @@ namespace myclouddisk
         /// <param name="newName">新名字</param>
         public static void POST(string user, string password, string fileType, string contentType, string oldFullPath, string newName)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(generateHttpURI(fileType,oldFullPath));
+            Console.WriteLine("POST URI" + generateHttpURI(fileType, oldFullPath) + "/" + newName.Trim());
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(generateHttpURI(fileType,oldFullPath)+"/"+newName);
+
 
             log.WriteLine(System.DateTime.Now.ToString() + " POST " + request.RequestUri);
 
@@ -257,34 +260,17 @@ namespace myclouddisk
             request.Method = "POST";
             request.Headers.Add("Authorization", user + ":" + password);
             request.Headers.Add("X-CDMI-Specification-Version", "v1");
-            ///
-            /// 
-            /// 
-            ///
-            string utf8_str = "";
-            byte[] buffer = Encoding.GetEncoding("GBK").GetBytes(newName.Trim()); 
-            utf8_str = Encoding.UTF8.GetString(buffer);
-            Console.WriteLine("POST 参数转化成UTF8："+utf8_str);
-            try
-            {
-                request.Headers.Add("current-name", utf8_str);
-                
-            }
-            catch(System.ArgumentException ee)
-            {
-                log.WriteLine("POST 参数异常 :" + ee);
-                System.Console.WriteLine("POST 参数异常 :" + ee);
-                System.Console.WriteLine("POST 非法的参数 :" + newName);
-                return;
-            }
-            
+            request.Headers.Add("current-name", "");
 
             request.Host = Program.HOST;
             request.Date = System.DateTime.Now;
 
             request.Timeout = 5000;
+
+            request.ContentLength = 0;
+
             try
-            {
+            {            
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 Console.WriteLine(response.Headers);
             }
@@ -394,12 +380,13 @@ namespace myclouddisk
             request.Date = System.DateTime.Now;
 
             request.Timeout = 1000*10;
+            Stream stream = null;
             try
             {
                 Thread.Sleep(2000);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 Console.WriteLine(response.Headers);
-                Stream stream = response.GetResponseStream();
+                stream = response.GetResponseStream();
 
                 BinaryReader br = new BinaryReader(response.GetResponseStream());
 
@@ -408,7 +395,7 @@ namespace myclouddisk
                 string text = Encoding.UTF8.GetString(buffer);
                 
                 br.Close();
-                //stream.Close();
+
                 if (contentType == "scloud-container")
                 {   
                     return transfer(text, 0);
@@ -422,6 +409,7 @@ namespace myclouddisk
                 Console.WriteLine(ee);
                 return null;
             }
+          
         }
         /// <summary>
         /// 获取本机局域网ip地址

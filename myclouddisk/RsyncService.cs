@@ -37,8 +37,8 @@ namespace myclouddisk
 
             //
             //服务器端存在bug，无法在根目录创建文件
-            //string[] rootobjects = HTTPClient.getRootContainer(Program.USER, Program.PASSWD, "scloud-object");
-            //initLocalObjects(rootobjects);
+            string[] rootobjects = HTTPClient.getRootContainer(Program.USER, Program.PASSWD, "scloud-object");
+            initLocalObjects(rootobjects);
 
             getObjects(root);
 
